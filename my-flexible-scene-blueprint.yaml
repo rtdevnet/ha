@@ -10,18 +10,20 @@ blueprint:
     brightness_pct:
       name: Brightness Percentage
       description: The brightness percentage for the lights
-      number:
-        min: 1
-        max: 100
-        step: 1
-        mode: slider
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          mode: slider
       default: 100
     snapshot_entities:
       name: Entities to Snapshot
       description: A list of entities to be captured in the scene
-      entity:
-        domain: light
-        multiple: true
+      selector:
+        entity:
+          domain: light
+          multiple: true
       default: []
 
 sequence:
