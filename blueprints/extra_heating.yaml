@@ -67,10 +67,11 @@ trigger:
 variables:
   temperature: "{{ state_attr(!input climate_entity, 'temperature') | float }}"
   current_temperature: "{{ state_attr(!input climate_entity, 'current_temperature') | float }}"
+  temperature_threshold: !input temperature_threshold
 
 condition:
   - condition: template
-    value_template: {{ temperature - current_temperature >= temperature_threshold }}
+    value_template: "{{ temperature - current_temperature >= temperature_threshold }}"
 
 action:
   - service: switch.turn_on
