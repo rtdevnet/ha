@@ -65,8 +65,6 @@ trigger:
     to: heating
 
 variables:
-  temperature: "{{ state_attr(!input climate_entity, 'temperature') | float }}"
-  current_temperature: "{{ state_attr(!input climate_entity, 'current_temperature') | float }}"
   climate_entity: !input climate_entity
   temperature_threshold: !input temperature_threshold
 
