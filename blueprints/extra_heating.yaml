@@ -19,19 +19,44 @@ blueprint:
           domain: switch
     temperature_threshold:
       name: "Required temperature difference"
+      selector:
+        number:
+          min: 0.1
+          max: 5
+          step: 0.1
+          mode: slider
       default: 1
     roc_sensor:
       name: "Rate-of-change sensor"
+      selector:
+        entity:
+          domain: sensor
       default: sensor.zolder_temperature_rate_of_change
     roc_below:
       name: "ROC below threshold"
+      selector:
+        number:
+          min: 0.01
+          max: 1
+          step: 0.01
+          mode: slider
       default: 0.05
     roc_duration:
       name: "ROC duration (HH:MM:SS)"
-      default: "00:15:00"
+      selector:
+        duration:
+      default:
+        hours: 0
+        minutes: 15
+        seconds: 0
     wait_timeout:
       name: "Heating timeout (HH:MM:SS)"
-      default: "01:00:00"
+      selector:
+        duration:
+      default:
+        hours: 1
+        minutes: 0
+        seconds: 0
 
 trigger:
   - platform: state
