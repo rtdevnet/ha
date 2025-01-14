@@ -1,0 +1,45 @@
+
+blueprint:
+  name: Reusable Scene Snapshot
+  description: This blueprint captures a snapshot of selected lights, sets them to a brightness, and restores them when run again.
+  domain: script
+  input:
+    scene_id:
+      name: Scene ID
+      description: The ID for the scene to store or restore
+      default: "zithoek_snapshot"
+    brightness_pct:
+      name: Brightness Percentage
+      description: The brightness percentage for the lights
+      default: 100
+    light_entity:
+      name: Light entity
+      description: The entity ID of the lights to be captured and restored
+      default: "light.lichten_zithoek"
+
+sequence:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ states.scene[scene_id] == None }}"
+        sequence:
+          - service: scene.create
+            data:
+              scene_id: "{{ scene_id }}"
+              snapshot_entities:
+                - "{{ light_entity }}"
+          - service: light.turn_on
+            data:
+              brightness_pct: "{{ brightness_pct }}"
+            target:
+              entity_id: "{{ light_entity }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ states.scene[scene_id] != None }}"
+        sequence:
+          - service: scene.turn_on
+            target:
+              entity_id: "scene.{{ scene_id }}"
+          - service: scene.delete
+            target:
+              entity_id: "scene.{{ scene_id }}"

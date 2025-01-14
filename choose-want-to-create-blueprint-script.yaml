@@ -1,0 +1,31 @@
+choose:
+  - conditions:
+      - condition: template
+        value_template: "{{ states.scene.zithoek_snapshot == None }}"
+    sequence:
+      - action: scene.create
+        metadata: {}
+        data:
+          scene_id: zithoek_snapshot
+          snapshot_entities:
+            - light.lichten_zithoek
+      - action: light.turn_on
+        metadata: {}
+        data:
+          brightness_pct: 100
+        target:
+          entity_id: light.lichten_zithoek
+  - conditions:
+      - condition: template
+        value_template: "{{ states.scene.zithoek_snapshot != None }}"
+    sequence:
+      - action: scene.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.zithoek_snapshot
+      - action: scene.delete
+        metadata: {}
+        data: {}
+        target:
+          entity_id: scene.zithoek_snapshot

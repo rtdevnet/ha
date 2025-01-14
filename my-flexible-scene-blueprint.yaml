@@ -1,0 +1,58 @@
+blueprint:
+  name: Reusable Scene Snapshot
+  description: This blueprint captures a snapshot of selected entities, sets them to a brightness, and restores them when run again.
+  domain: script
+  input:
+    scene_id:
+      name: Scene ID
+      description: The ID for the scene to store or restore
+      default: "zithoek_snapshot"
+    brightness_pct:
+      name: Brightness Percentage
+      description: The brightness percentage for the lights
+      default: 100
+    snapshot_entities:
+      name: Entities to Snapshot
+      description: A list of entities to be captured in the scene
+      default: []
+    color_temp:
+      name: Color Temperature
+      description: Apply this color temperature if not 0
+      default: 0
+    rgb_color:
+      name: RGB Color
+      description: Apply this color if provided (e.g. [255, 200, 100])
+      default: []
+
+sequence:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ states.scene[scene_id] == None }}"
+        sequence:
+          - service: scene.create
+            data:
+              scene_id: "{{ scene_id }}"
+              snapshot_entities: "{{ snapshot_entities }}"
+          - service: light.turn_on
+            data_template:
+              brightness_pct: "{{ brightness_pct }}"
+              {% if color_temp != 0 %}
+              color_temp: "{{ color_temp }}"
+              {% endif %}
+              {% if rgb_color %}
+              rgb_color: "{{ rgb_color }}"
+              {% endif %}
+            target:
+              entity_id: "{{ snapshot_entities }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ states.scene[scene_id] is not none }}"
+        sequence:
+          - service: scene.turn_on
+            data:
+              entity_id: "scene.{{ scene_id }}"
+          - service: scene.delete
+            data:
+              entity_id: "scene.{{ scene_id }}"
+      default: []
