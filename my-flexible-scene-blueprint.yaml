@@ -15,26 +15,16 @@ blueprint:
       name: Entities to Snapshot
       description: A list of entities to be captured in the scene
       default: []
-    color_temp:
-      name: Color Temperature
-      description: Apply this color temperature if not 0
-      default: 0
-    rgb_color:
-      name: RGB Color
-      description: Apply this color if provided (e.g. [255, 200, 100])
-      default: []
 
 sequence:
   - variables:
       scene_id: !input scene_id
       brightness_pct: !input brightness_pct
       snapshot_entities: !input snapshot_entities
-      color_temp: !input color_temp
-      rgb_color: !input rgb_color
   - choose:
     - conditions:
         - condition: template
-          value_template: "{{ states.scene[!input scene_id] == None }}"
+          value_template: "{{ states.scene[scene_id] == None }}"
       sequence:
         - service: scene.create
           data:
@@ -42,23 +32,12 @@ sequence:
             snapshot_entities: "{{ snapshot_entities }}"
         - service: light.turn_on
           data:
-            {% if color_temp != 0 %}
-            color_temp: "{{ color_temp }}"
-            {% endif %}
-            {% if rgb_color %}
-            rgb_color: "{{ rgb_color }}"
-            {% endif %}
-            {% if brightness_pct > 0 %}
-            brightness_pct: "{{ brightness_pct }}"
-            {% endif %}
-            {% if color_temp == 0 and not rgb_color and brightness_pct == 100 %}
-            {}
-            {% endif %}
+            brightness_pct: "{{ brightness_pct }}"          
           target:
             entity_id: !input snapshot_entities
     - conditions:
         - condition: template
-          value_template: {{ states.scene[scene_id] is not none }}
+          value_template: "{{ states.scene[scene_id] is not none }}"
       sequence:
         - service: scene.turn_on
           data:
