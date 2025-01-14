@@ -10,10 +10,18 @@ blueprint:
     brightness_pct:
       name: Brightness Percentage
       description: The brightness percentage for the lights
+      number:
+        min: 1
+        max: 100
+        step: 1
+        mode: slider
       default: 100
     snapshot_entities:
       name: Entities to Snapshot
       description: A list of entities to be captured in the scene
+      entity:
+        domain: light
+        multiple: true
       default: []
 
 sequence:
@@ -34,7 +42,7 @@ sequence:
           data:
             brightness_pct: "{{ brightness_pct }}"          
           target:
-            entity_id: !input snapshot_entities
+            entity_id: "{{ snapshot_entities }}"
     - conditions:
         - condition: template
           value_template: "{{ states.scene[scene_id] is not none }}"
