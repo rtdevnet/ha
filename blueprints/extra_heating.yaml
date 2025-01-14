@@ -1,0 +1,67 @@
+blueprint:
+  name: "Extra Heating"
+  domain: automation
+  description: "Heating blueprint created by Martijn for flexible control."
+  homeassistant:
+    min_version: 2024.1.0
+  input:
+    climate_entity:
+      name: "Climate entity"
+      default: climate.zolder
+      selector:
+        entity:
+          domain: climate
+    switch_entity:
+      name: "Switch entity"
+      default: switch.bijzetkachel_1_schakelaar
+      selector:
+        entity:
+          domain: switch
+    temperature_threshold:
+      name: "Required temperature difference"
+      default: 1
+    roc_sensor:
+      name: "Rate-of-change sensor"
+      default: sensor.zolder_temperature_rate_of_change
+    roc_below:
+      name: "ROC below threshold"
+      default: 0.05
+    roc_duration:
+      name: "ROC duration (HH:MM:SS)"
+      default: "00:15:00"
+    wait_timeout:
+      name: "Heating timeout (HH:MM:SS)"
+      default: "01:00:00"
+
+trigger:
+  - platform: state
+    entity_id: !input climate_entity
+    attribute: hvac_action
+    to: heating
+
+condition:
+  - condition: template
+    value_template: >
+      {{ (state_attr(!input climate_entity, 'temperature') | float)
+         - (state_attr(!input climate_entity, 'current_temperature') | float)
+         >= ( !input temperature_threshold | float ) }}
+
+action:
+  - service: switch.turn_on
+    target:
+      entity_id: !input switch_entity
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id: !input roc_sensor
+      for: !input roc_duration
+      below: !input roc_below
+    - platform: state
+      entity_id: !input climate_entity
+      attribute: hvac_action
+      from: heating
+    timeout: !input wait_timeout
+  - service: switch.turn_off
+    target:
+      entity_id: !input switch_entity
+
+mode: single

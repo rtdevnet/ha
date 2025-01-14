@@ -1,0 +1,43 @@
+- id: '1736759533274'
+  alias: Zolder Extra Heating
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - climate.zolder
+    to: heating
+    attribute: hvac_action
+  conditions:
+  - condition: template
+    value_template: '{{ (trigger.to_state.attributes.temperature | float) - (trigger.to_state.attributes.current_temperature
+      | float) >= 1 }}'
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.bijzetkachel_1_schakelaar
+  - wait_for_trigger:
+    - trigger: numeric_state
+      entity_id:
+      - sensor.zolder_temperature_rate_of_change
+      for:
+        hours: 0
+        minutes: 15
+        seconds: 0
+      below: 0.05
+    - trigger: state
+      entity_id:
+      - climate.zolder
+      attribute: hvac_action
+      from: heating
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.bijzetkachel_1_schakelaar
+  mode: single
