@@ -1,0 +1,60 @@
+blueprint:
+  name: ButtonPlus Cleanup Buttons
+  description: "Reset button configurations based on specific conditions."
+  domain: automation
+  input:
+    entities:
+      name: Input Text Entities
+      description: List of input_text entities to clean up.
+      selector:
+        entity:
+          domain: input_text
+          multiple: true
+    trigger_time:
+      name: Cleanup Trigger Time
+      description: Time to trigger the cleanup process.
+      selector:
+        time:
+    toplabel_match:
+      name: Toplabel Match
+      description: Value of the toplabel to match.
+      selector:
+        text:
+    label_match:
+      name: Label Match
+      description: Value of the label to match.
+      selector:
+        text:
+
+trigger:
+  - platform: time
+    at: !input trigger_time
+
+condition: []
+
+action:
+  - repeat:
+      for_each: !input entities
+      sequence:
+        - variables:
+            raw_value: |
+              {% set raw = states(repeat.item) | default('') %}
+              {% if raw == '' %}
+                {}
+              {% else %}
+                {{ raw | from_json | default({}) }}
+              {% endif %}
+        - if:
+            - condition: template
+              value_template: >
+                {{ 'toplabel' in raw_value and raw_value['toplabel'] == 
+                (toplabel_match | string) and
+                'label' in raw_value and raw_value['label'] == 
+                (label_match | string) }}
+          then:
+            - service: input_text.set_value
+              target:
+                entity_id: "{{ repeat.item }}"
+              data:
+                value: "{}"
+mode: queued
