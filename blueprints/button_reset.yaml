@@ -1,6 +1,8 @@
 blueprint:
   name: ButtonPlus Cleanup Buttons
-  description: "Reset button configurations based on specific conditions."
+  description: >
+    Reset button configurations based on specific conditions. You can specify 
+    either or both `toplabel` and `label` values to match.
   domain: automation
   input:
     entities:
@@ -16,15 +18,17 @@ blueprint:
       selector:
         time:
     toplabel_match:
-      name: Toplabel Match
-      description: Value of the toplabel to match.
+      name: Toplabel Match (Optional)
+      description: Value of the toplabel to match. Leave empty to ignore.
       selector:
         text:
+      default: ""
     label_match:
-      name: Label Match
-      description: Value of the label to match.
+      name: Label Match (Optional)
+      description: Value of the label to match. Leave empty to ignore.
       selector:
         text:
+      default: ""
 
 trigger:
   - platform: time
@@ -47,10 +51,14 @@ action:
         - if:
             - condition: template
               value_template: >
-                {{ 'toplabel' in raw_value and raw_value['toplabel'] == 
-                (toplabel_match | string) and
-                'label' in raw_value and raw_value['label'] == 
-                (label_match | string) }}
+                {% set toplabel_check = !input toplabel_match | string %}
+                {% set label_check = !input label_match | string %}
+                {{ 
+                  (toplabel_check == "" or 
+                   ('toplabel' in raw_value and raw_value['toplabel'] == toplabel_check)) and
+                  (label_check == "" or 
+                   ('label' in raw_value and raw_value['label'] == label_check))
+                }}
           then:
             - service: input_text.set_value
               target:
