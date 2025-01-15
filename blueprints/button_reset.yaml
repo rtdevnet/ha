@@ -41,7 +41,9 @@ action:
       for_each: !input entities
       sequence:
         - variables:
-            raw_value: |
+            toplabel_check: !input toplabel_match
+            label_check: !input label_match
+            raw_value: >
               {% set raw = states(repeat.item) | default('') %}
               {% if raw == '' %}
                 {}
@@ -51,8 +53,6 @@ action:
         - if:
             - condition: template
               value_template: >
-                {% set toplabel_check = !input toplabel_match | string %}
-                {% set label_check = !input label_match | string %}
                 {{ 
                   (toplabel_check == "" or 
                    ('toplabel' in raw_value and raw_value['toplabel'] == toplabel_check)) and
